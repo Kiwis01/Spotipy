@@ -3,10 +3,10 @@ Python executable application that allows the user play, pause and skip song on 
 
 # Imports installation
 To use you need to install
-pip install spotipy
-pip install PyQt6
-pip install requests
-pip install dotenv
+-pip install spotipy
+-pip install PyQt6
+-pip install requests
+-pip install dotenv
 
 # Setup and Environmental variables 
 Make an .env file where you will have two variables 'CLIENT_ID' and 'CLIENT_SECRET', you can get these values from your spotify app https://developer.spotify.com/dashboard
