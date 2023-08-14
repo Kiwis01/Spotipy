@@ -1,11 +1,12 @@
 import sys
-import time
+import requests
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget
+from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget, QProgressBar
 from PyQt6.QtGui import QPixmap
-import requests
+from PyQt6.QtCore import QTimer
 from dotenv import load_dotenv, dotenv_values
+
 
 config = dotenv_values(".env")
 
@@ -23,9 +24,13 @@ class MainWindow(QMainWindow):
 
         self.setGeometry(100, 100, 300, 200)
         self.setWindowTitle("Spotify Controller")
-
+        
         # Create UI elements
         self.initUI()
+
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.progress_bar)
+        self.timer.start(1500)
 
     def initUI(self):
         layout = QVBoxLayout()
@@ -35,6 +40,7 @@ class MainWindow(QMainWindow):
 
         # Get initial track info
         self.update_ui()
+        check_playing, track_progress, song_duration = self.track_info()
 
         # Create control buttons
         button1 = QPushButton("Play", self)
@@ -54,6 +60,13 @@ class MainWindow(QMainWindow):
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
 
+        #progressBar
+        self.progressBar = QProgressBar()
+        self.progressBar.setMinimum(0)
+        self.progressBar.setMaximum(song_duration)
+        layout.addWidget(self.progressBar)
+
+
     def update_ui(self):
         results = sp.current_user_playing_track()
         if results:
@@ -71,6 +84,15 @@ class MainWindow(QMainWindow):
                 self.image_label.setPixmap(pixmap)
                 self.image_label.setScaledContents(True)
 
+    def track_info(self):
+        results = sp.current_user_playing_track()
+        if results:
+            track_info = results['item']
+            track_progress = results['progress_ms']
+            check_playing = results['is_playing']
+            song_duration = track_info['duration_ms']
+        return check_playing, track_progress, song_duration    
+
     def load_image_from_url(self, url):
         response = requests.get(url)
         if response.status_code == 200:
@@ -80,17 +102,32 @@ class MainWindow(QMainWindow):
         return None
 
     def on_button1_clicked(self):
-        sp.start_playback()
+        check_playing, track_progress, song_duration = self.track_info()
+        if check_playing != True:
+            sp.start_playback()
+            self.timer.start(1500)
         self.update_ui()
 
     def on_button2_clicked(self):
-        sp.pause_playback()
+        check_playing, track_progress, song_duration = self.track_info()
+        if check_playing == True:
+            sp.pause_playback()
+            self.timer.stop()
         self.update_ui()
 
     def on_button3_clicked(self):
         sp.next_track()
-        time.sleep(0.2)
         self.update_ui()
+
+    def progress_bar(self):
+        check_playing, track_progress, song_duration = self.track_info()
+        if check_playing:
+            percentage = (track_progress * 100) / song_duration 
+            if percentage < 5:
+                self.update_ui()
+            self.progressBar.setMaximum(song_duration)
+            self.progressBar.setValue(track_progress)
+            
 
 # Create and show the window
 app = QApplication(sys.argv)
