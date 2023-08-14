@@ -2,7 +2,7 @@
 Python executable application that allows the user play, pause and skip song on spotify, utilizing spotify api
 
 # Imports installation
-# To use you need to install
+To use you need to install
 pip install spotipy
 pip install PyQt6
 pip install requests
