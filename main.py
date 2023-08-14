@@ -5,7 +5,8 @@ from spotipy.oauth2 import SpotifyOAuth
 from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel, QVBoxLayout, QWidget, QProgressBar
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtCore import QTimer
-from dotenv import load_dotenv, dotenv_values
+from PyQt6 import QtGui
+from dotenv import dotenv_values
 
 
 config = dotenv_values(".env")
@@ -21,6 +22,8 @@ sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+
+        self.setWindowIcon(QtGui.QIcon('icons/kiwi.png'))
 
         self.setGeometry(100, 100, 300, 200)
         self.setWindowTitle("Spotify Controller")
